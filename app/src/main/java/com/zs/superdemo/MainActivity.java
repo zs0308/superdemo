@@ -23,6 +23,9 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
+/**
+ * code no bug
+ */
 public class MainActivity extends AppCompatActivity {
 
     @Bind(R.id.tv_hello)
