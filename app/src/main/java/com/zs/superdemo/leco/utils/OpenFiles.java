@@ -7,6 +7,7 @@ import java.io.File;
 
 /**
  * Created by zs on 2018/9/17.
+ * https://blog.csdn.net/u014452224/article/details/50560059
  */
 public class OpenFiles {
     //android获取一个用于打开HTML文件的intent
