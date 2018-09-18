@@ -29,7 +29,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:support-v4:27.1.1'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+//    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     implementation 'com.android.support:design:27.1.1'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
@@ -42,8 +42,7 @@ dependencies {
     implementation 'com.zhy:base-rvadapter:3.0.3'
     //event bus
     implementation 'org.greenrobot:eventbus:3.0.0'
-    //GsonUtil
-    implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
+
     //---------------------------- UI ----------------------------------
     //通知栏 沉浸
     implementation 'com.jaeger.statusbaruitl:library:1.3.6'
@@ -54,6 +53,19 @@ dependencies {
     //BGA下拉刷新必须依赖的
     implementation 'com.nineoldandroids:library:2.4.0'
     implementation 'cn.bingoogolapple:bga-refreshlayout:1.1.0@aar'
+
+    //---------------------------- other ----------------------------------
     //文件选择利器 https://github.com/leonHua/LFilePicker
     implementation 'com.leon:lfilepickerlibrary:1.8.0'
+
+    //no_http 接口
+    implementation 'com.yanzhenjie.nohttp:nohttp:1.1.4'
+    implementation 'com.yanzhenjie.nohttp:okhttp:1.1.4'
+    //GsonUtil
+    implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
+    //MProgressDialog 提示框封装,支持背景颜色,圆角,边框和文字的自定义
+    //https://github.com/maning0303/MNProgressHUD
+    implementation 'com.github.maning0303:MNProgressHUD:V1.0.0'
+
+    implementation 'com.android.support:multidex:1.0.0'
 }

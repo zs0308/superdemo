@@ -59,7 +59,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
-//import com.maning.mndialoglibrary.MToast;
+import com.maning.mndialoglibrary.MToast;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -102,6 +102,8 @@ import java.util.regex.Pattern;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+//import com.maning.mndialoglibrary.MToast;
+
 public class LecoUtils {
 
     //是否打印log
@@ -124,7 +126,7 @@ public class LecoUtils {
     }
 
     public static void showToast(Context context, String msg) {
-//        MToast.makeTextShort(context, msg);
+        MToast.makeTextShort(context, msg);
     }
 
 

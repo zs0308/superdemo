@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -26,8 +25,20 @@ import com.blankj.utilcode.util.PhoneUtils;
 import com.blankj.utilcode.util.ScreenUtils;
 import com.leon.lfilepickerlibrary.LFilePicker;
 import com.leon.lfilepickerlibrary.utils.Constant;
+import com.maning.mndialoglibrary.MToast;
+import com.yanzhenjie.nohttp.NoHttp;
+import com.yanzhenjie.nohttp.RequestMethod;
+import com.yanzhenjie.nohttp.rest.Request;
+import com.yanzhenjie.nohttp.rest.Response;
 import com.zhy.adapter.recyclerview.CommonAdapter;
 import com.zhy.adapter.recyclerview.base.ViewHolder;
+import com.zs.superdemo.leco.activity.base.BaseActivity;
+import com.zs.superdemo.leco.network.ResultJson;
+import com.zs.superdemo.leco.network.UrlConstant;
+import com.zs.superdemo.leco.network.nohttp.HttpListener;
+import com.zs.superdemo.leco.network.nohttp.NoHttpUtil;
+import com.zs.superdemo.leco.utils.GsonUtil;
+import com.zs.superdemo.leco.utils.LecoUtils;
 import com.zs.superdemo.leco.utils.MLog;
 import com.zs.superdemo.leco.utils.OpenFiles;
 
@@ -41,7 +52,7 @@ import butterknife.ButterKnife;
 /**
  * code no bug a
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
     private final int SELECT_FILE = 1000;//选择文件
     private final int SELECT_FILE_LFile = 1001;//选择文件
     @Bind(R.id.tv_hello)
@@ -63,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
         list.add("3 打开网络设置界面");
         list.add("4 select file test");
         list.add("5 文件选择 Ifilepickerlibrary");
+        list.add("6 test nohttp");
         MLog.e("list.size=" + list.size());
         LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(getBaseContext());
         recycler.setLayoutManager(mLinearLayoutManager);
@@ -112,6 +124,9 @@ public class MainActivity extends AppCompatActivity {
                                         .withBackgroundColor("#FF9966")
                                         .start();
 
+                                break;
+                            case 5:
+                                login("18392184426","000000");
                                 break;
                         }
                     }
@@ -274,4 +289,49 @@ public class MainActivity extends AppCompatActivity {
     public boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
+
+    /**
+     * 登录
+     *
+     * @param userPhone
+     * @param loginPwd
+     */
+    private void login(String userPhone, String loginPwd) {
+        LecoUtils.Log("自动登录 接口开始传参 userRegist userPhone = " + userPhone + ",loginPwd=" + loginPwd);
+        Request<String> request = NoHttp.createStringRequest(UrlConstant.SERVER_BASE_URL + UrlConstant.login, RequestMethod.POST);
+        request.add("userPhone", userPhone);
+        request.add("loginPwd", loginPwd);
+//        request.add("client_type", LecoConstant.CLIENT_TYPE);
+
+        NoHttpUtil.getInstance(this).sendRequest(0, request, new HttpListener<String>() {
+            @Override
+            public void onSucceed(int what, Response<String> response) {
+                LecoUtils.Log("登录 userRegist onSucceed=========== " + response.responseCode() + "  === " + response.get());
+                if (response.responseCode() == 200) {
+                    ResultJson resultJson = GsonUtil.getGson().fromJson(response.get(), ResultJson.class);
+                    switch (resultJson.getCode()) {
+                        case ResultJson.SUCCESS_CODE:
+//                            LecoUtils.showToast(getBaseContext(), "登录成功");
+                            LecoUtils.Log("登录 SUCCESS_CODE SUCCESS_CODE");
+                            break;
+                        case ResultJson.SESSION_FAILED:
+                            LecoUtils.showToast(getBaseContext(), LecoUtils.SessionFailNotice);
+//                            Intent intent = new Intent(getBaseContext(), LoginActivity.class);
+//                            startActivity(intent);
+                            break;
+                        case ResultJson.FAILED_CODE:
+                            MToast.makeTextShort(getBaseContext(), resultJson.getMsg());
+                            break;
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<String> response) {
+                MLog.e("登录 onFailed=========== " + response.responseCode() + "  === " + response.get());
+
+            }
+        },  true,true, "请稍后...");
+    }
+
 }
