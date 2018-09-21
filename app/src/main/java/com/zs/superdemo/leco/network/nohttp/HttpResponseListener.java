@@ -68,23 +68,23 @@ public class HttpResponseListener<T> implements OnResponseListener<T> {
         this.msg = msg;
         MLog.e("mWaitDialog=" + mWaitDialog);
         if (activity != null && isLoading) {
-            mWaitDialog = new MProgressDialog(activity);
+            mWaitDialog = new MProgressDialog();
         }
         if (canCancel) {
-//            if (mWaitDialog != null && mWaitDialog.isShowing()) {
-//                mWaitDialog.dismiss();
-//                request.cancel();
-//            }
-
-            if (mWaitDialog!=null){
-                mWaitDialog.setCanceledOnTouchOutside(true);
-                mWaitDialog.setOnDialogDismissListener(new MProgressDialog.OnDialogDismissListener() {
-                    @Override
-                    public void dismiss() {
-
-                    }
-                });
+            if (mWaitDialog != null && mWaitDialog.isShowing()) {
+                mWaitDialog.dismissProgress();
+                request.cancel();
             }
+
+//            if (mWaitDialog!=null){
+//                mWaitDialog.setCanceledOnTouchOutside(true);
+//                mWaitDialog.setOnDialogDismissListener(new MProgressDialog.OnDialogDismissListener() {
+//                    @Override
+//                    public void dismiss() {
+//
+//                    }
+//                });
+//            }
         }
         this.callback = httpCallback;
     }
@@ -101,7 +101,7 @@ public class HttpResponseListener<T> implements OnResponseListener<T> {
         this.mRequest = request;
         this.msg = msg;
         if (activity != null && isLoading) {
-            mWaitDialog = new MProgressDialog(activity);
+            mWaitDialog = new MProgressDialog();
         }
         this.callback = httpCallback;
     }
@@ -117,7 +117,7 @@ public class HttpResponseListener<T> implements OnResponseListener<T> {
         this.mRequest = request;
         this.msg = "";
         if (activity != null && isLoading) {
-            mWaitDialog = new MProgressDialog(activity);
+            mWaitDialog = new MProgressDialog();
         }
         this.callback = httpCallback;
     }
@@ -140,9 +140,9 @@ public class HttpResponseListener<T> implements OnResponseListener<T> {
     public void onStart(int what) {
         if (mWaitDialog != null && !mActivity.isFinishing()) {
             if (TextUtils.isEmpty(msg)) {
-                mWaitDialog.showNoText();
+                mWaitDialog.showProgress(mActivity);
             } else {
-                mWaitDialog.show(msg);
+                mWaitDialog.showProgress(mActivity,msg);
             }
         }
     }
@@ -153,7 +153,7 @@ public class HttpResponseListener<T> implements OnResponseListener<T> {
     @Override
     public void onFinish(int what) {
         if (mWaitDialog != null) {
-            mWaitDialog.dismiss();
+            mWaitDialog.dismissProgress();
         }
     }
 
