@@ -46,19 +46,19 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-
 /**
  * code no bug a
  */
 public class MainActivity extends BaseActivity {
     private final int SELECT_FILE = 1000;//选择文件
     private final int SELECT_FILE_LFile = 1001;//选择文件
-    @Bind(R.id.tv_hello)
-    TextView tvHello;
-    @Bind(R.id.recycler)
-    RecyclerView recycler;
+//    @Bind(R.id.tv_hello)
+//    TextView tvHello;
+//    @Bind(R.id.recycler)
+//    RecyclerView recycler;
+
+    private TextView tvHello;
+    private RecyclerView recycler;
 
     private List<String> list = new ArrayList<>();
 
@@ -67,7 +67,10 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
+//        ButterKnife.bind(this);
+        tvHello  = findViewById(R.id.tv_hello);
+        recycler  = findViewById(R.id.recycler);
+
         Log.e("zs", "hiyou  SHA1=" + AppUtils.getAppSignatureSHA1("com.leco.haiyoufurniture"));
         list.add("1 跳至发送短信界面");
         list.add("2 截屏");
