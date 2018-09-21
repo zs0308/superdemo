@@ -68,7 +68,7 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        Log.e("zs", "hiyou SHA1=" + AppUtils.getAppSignatureSHA1("com.leco.haiyoufurniture"));
+        Log.e("zs", "hiyou  SHA1=" + AppUtils.getAppSignatureSHA1("com.leco.haiyoufurniture"));
         list.add("1 跳至发送短信界面");
         list.add("2 截屏");
         list.add("3 打开网络设置界面");
