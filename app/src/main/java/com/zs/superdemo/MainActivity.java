@@ -1,17 +1,30 @@
 package com.zs.superdemo;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.ClipboardManager;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -33,6 +46,7 @@ import com.yanzhenjie.nohttp.rest.Response;
 import com.zhy.adapter.recyclerview.CommonAdapter;
 import com.zhy.adapter.recyclerview.base.ViewHolder;
 import com.zs.superdemo.leco.activity.base.BaseActivity;
+import com.zs.superdemo.leco.activity.commonui.PicWaterMark;
 import com.zs.superdemo.leco.network.ResultJson;
 import com.zs.superdemo.leco.network.UrlConstant;
 import com.zs.superdemo.leco.network.nohttp.HttpListener;
@@ -46,9 +60,17 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
+
 /**
  * code no bug a
  */
+@RuntimePermissions
 public class MainActivity extends BaseActivity {
     private final int SELECT_FILE = 1000;//选择文件
     private final int SELECT_FILE_LFile = 1001;//选择文件
@@ -68,8 +90,8 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 //        ButterKnife.bind(this);
-        tvHello  = findViewById(R.id.tv_hello);
-        recycler  = findViewById(R.id.recycler);
+        tvHello = findViewById(R.id.tv_hello);
+        recycler = findViewById(R.id.recycler);
 
         Log.e("zs", "hiyou  SHA1=" + AppUtils.getAppSignatureSHA1("com.leco.haiyoufurniture"));
         list.add("1 跳至发送短信界面");
@@ -78,6 +100,13 @@ public class MainActivity extends BaseActivity {
         list.add("4 select file test");
         list.add("5 文件选择 Ifilepickerlibrary");
         list.add("6 test nohttp");
+        list.add("7 图片水印");
+        list.add("8 打开微信");
+        list.add("9 点击复制这段文字");
+        list.add("10 权限测试");
+        list.add("11 8.0通知栏适配");
+        list.add("11    发送聊天信息");
+        list.add("11    发送订阅信息");
         MLog.e("list.size=" + list.size());
         LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(getBaseContext());
         recycler.setLayoutManager(mLinearLayoutManager);
@@ -129,7 +158,45 @@ public class MainActivity extends BaseActivity {
 
                                 break;
                             case 5:
-                                login("18392184426","000000");
+                                login("18392184426", "000000");
+                                break;
+                            case 6:
+                                //水印图片
+                                intent = new Intent(getBaseContext(), PicWaterMark.class);
+                                startActivity(intent);
+                                break;
+                            case 7:
+                                //打开微信
+                                startApp("com.tencent.mm");
+                                break;
+                            case 8:
+                                //复制这段文字
+                                ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                cm.setText(list.get(8));
+                                Toast.makeText(getBaseContext(), "复制成功", Toast.LENGTH_SHORT).show();
+                                break;
+                            case 9:
+                                MLog.e("打电话了");
+                                MainActivityPermissionsDispatcher.callWithCheck(MainActivity.this, "10086");
+                                break;
+                            case 10:
+                                //
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    String channelId = "chat";
+                                    String channelName = "聊天信息";
+                                    int importance = NotificationManager.IMPORTANCE_HIGH;
+                                    createNoticationChannel(channelId, channelName, importance);
+                                    channelId = "subscribe";
+                                    channelName = "订阅消息";
+                                    importance = NotificationManager.IMPORTANCE_DEFAULT;
+                                    createNoticationChannel(channelId, channelName, importance);
+                                }
+                                break;
+                            case 11:
+                                sendChatMsg();
+                                break;
+                            case 12:
+                                sendSubscribeMsg();
                                 break;
                         }
                     }
@@ -141,7 +208,118 @@ public class MainActivity extends BaseActivity {
         boolean is4G = NetworkUtils.is4G();
         MLog.e("is4G=" + is4G);
 
-        PhoneUtils.getIMEI();
+//        PhoneUtils.getIMEI();
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    private void createNoticationChannel(String channelId, String channelName, int importance) {
+        NotificationChannel channel = new NotificationChannel(channelId, channelName, importance);
+        channel.setShowBadge(true);//表示允许这个渠道下的通知显示角标
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotificationManager.createNotificationChannel(channel);
+    }
+
+    private void sendChatMsg(){
+        NotificationManager mManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Notification mNotification = new NotificationCompat.Builder(this,"chat")
+                .setContentTitle("收到一条聊天消息")
+                .setContentText("今天中午吃什么？")
+                .setWhen(System.currentTimeMillis())
+                .setSmallIcon(R.drawable.test_pic_3)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.test_pic_1))
+                .setAutoCancel(true)
+                .setNumber(2)//传入未读消息的数量
+                .build();
+        mManager.notify(1,mNotification);
+
+    }
+
+    private void sendSubscribeMsg(){
+        NotificationManager mManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Notification mNotification = new NotificationCompat.Builder(this,"subscribe")
+                .setContentTitle("收到一条订阅消息")
+                .setContentText("地铁沿线30万商铺抢购中")
+                .setWhen(System.currentTimeMillis())
+                .setSmallIcon(R.drawable.btn_bg)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.test_pic_2))
+                .setAutoCancel(true)
+                .build();
+        mManager.notify(2,mNotification);
+
+    }
+    @NeedsPermission(Manifest.permission.CALL_PHONE)
+        //在需要获取的地方注释
+    void call(String string) {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        Uri data = Uri.parse("tel:" + string);
+        intent.setData(data);
+        MLog.e("11111");
+        try {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            startActivity(intent);
+        } catch (Exception e) {
+            MLog.e("打电话异常 e=" + e);
+        }
+    }
+
+    @OnShowRationale(Manifest.permission.CALL_PHONE)
+        //提示用户为何要开此权限
+    void showWhy(final PermissionRequest mRequest) {
+        new AlertDialog.Builder(this)
+                .setMessage("提示用户为何要开启权限，因为你要打电话")
+                .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mRequest.proceed();//再次执行权限请求
+                    }
+                })
+                .show();
+
+    }
+
+    @OnPermissionDenied(Manifest.permission.CALL_PHONE)
+        //用户选择拒绝的提式
+    void showDenied() {
+        Toast.makeText(this, "哦你拒绝了", Toast.LENGTH_SHORT).show();
+    }
+
+    @OnNeverAskAgain(Manifest.permission.CALL_PHONE)
+    void showNotAsk() {
+        new AlertDialog.Builder(this)
+                .setMessage("该功能要访问权限，拒绝你会后悔的")
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        MainActivityPermissionsDispatcher.onRequestPermissionsResult(MainActivity.this, requestCode, grantResults);
+    }
+
+    private void startApp(String packageName) {
+        PackageManager packageManager = getPackageManager();
+        Intent intent = new Intent();
+        intent = packageManager.getLaunchIntentForPackage(packageName);
+        if (intent == null) {
+            Toast.makeText(this, "未安装", Toast.LENGTH_LONG).show();
+        } else {
+            startActivity(intent);
+        }
     }
 
     String path;
@@ -334,7 +512,7 @@ public class MainActivity extends BaseActivity {
                 MLog.e("登录 onFailed=========== " + response.responseCode() + "  === " + response.get());
 
             }
-        },  true,true, "请稍后...");
+        }, true, true, "请稍后...");
     }
 
 }
